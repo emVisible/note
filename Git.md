@@ -14,11 +14,7 @@ git
 
 ll ： 详细列表
 
-ls -a
-
 git init 
-
-rm -rf *
 
 git add .
 
@@ -129,3 +125,14 @@ git命令别名  git alias
     - 显示出来说明和master提交点相同
     - 说白了显示出来的是可以删除了的
   - git branch --no -merged
+
+---
+
+## 一般流程
+
+1. git pull
+2. git add .
+3. git commit -m 'xxx'
+4. git remote add origin (_SSH_)
+5. git branch -M main
+6.  git push origin main
