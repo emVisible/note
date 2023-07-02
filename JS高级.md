@@ -164,3 +164,17 @@
 - 内存泄露就是闭包导致部分内存无法被JS引擎进行GC解决方法就是将变量设置为null。
 
   ![image-20230611212726626](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20230611212726626.png)
+
+- V8引擎对其未用到的变量进行内存释放（优化）
+
+## this
+
+```
+|-Section1
+	|- VO对象
+	|- 父级作用域
+	|- this（动态）
+|-Section2
+	|- execute code body
+```
+
