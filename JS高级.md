@@ -1,4 +1,11 @@
-## JS高级
+# JS系统
+
+将伪数组变为真正的数组 
+
+- Array.from
+- ... 展开运算符
+
+# JS高级
 
 ## V8引擎
 
@@ -178,7 +185,59 @@
 	|- execute code body
 ```
 
-- 默认绑定
-- 隐式绑定
-- 显示绑定
-- new绑定
+- this绑定的类型
+  - 默认绑定
+  - 隐式绑定
+  - 显示绑定
+  - new绑定
+- 优先级
+
+```
+new > bind call&apply > 隐式 > 默认
+
+
+显示 bind > call
+```
+
+## 箭头函数
+
+- Arrow Function不绑定this
+- ArrowFunction不绑定arguments
+
+> 如何写一个返回对象对箭头函数？
+>
+> const result = ()=>({name: "young", foo(){})
+
+- this
+
+  - 箭头函数不绑定this
+
+  - this根据外层作用于来寻找
+
+    ```
+    /*
+      功能
+        在对象中对实际使用
+        这里理解对关键是，js中的高阶函数是不绑定this的
+    */
+    // setTimeout的function传统用法
+    const obj2 = {
+      data: [],
+      getData: function () {
+        const self = this;
+        setTimeout(function () {
+          self.data = ["newData"];
+        }, 1000);
+      },
+    };
+    
+    // setTimeout的箭头函数用法，使用箭头函数后就可以省去定义传递this的过程
+    const obj3 = {
+      data: [],
+      getData() {
+        setTimeout(() => {
+          this.data = ["newData"];
+        }, 1000);
+      },
+    };
+    ```
