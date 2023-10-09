@@ -1,9 +1,33 @@
-# JS系统
+# Tips
 
-将伪数组变为真正的数组 
+将伪数组/类数组变为真正的数组 （类数组本质上是对象）
+
+```
+拥有length、索引等
+但没有forEach、 
+```
+
+
 
 - Array.from
 - ... 展开运算符
+
+- xxx = xxx ? xxx : ooo 
+
+  ```
+  等同于
+  	xxx = xxx || ooo
+  ```
+
+- 边界优化 edge case
+
+性能优化
+
+- 累积布局偏移（Cumulative Layout Shift） CLS
+- 首次输入延迟（First Input Delay） FID
+- 首次内容绘制（First Contentful Paint） FCP
+- 最大内容绘制（Largest Contentful Paint）LCP
+- 首次字节时间（Time to First Byte）TFB
 
 # JS高级
 
@@ -247,4 +271,29 @@ new > bind call&apply > 隐式 > 默认
     函数有块级作用域
     ```
   
-    
+
+## ...
+
+- restParameters 剩余操作符
+
+  ```
+  函数形参中：
+  	接收
+  
+  如果没有传参数，那么默认是一个空数组
+  ```
+
+  
+
+- spread 展开运算符
+
+  ```
+  函数实参中：
+  	展开
+  ```
+
+## pure function
+
+- 相同输入 => 相同输出 （确定输入产生确定输出）
+- 对于输出，与输入以外的其它隐藏信息无关 && IO设备产生的外部输出无关 
+- 无语义上可观察的函数副作用，如“触发事件”，使输出设备输出，更改输出值以外的内容等（不产生副作用）
