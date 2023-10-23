@@ -4,9 +4,6 @@
 
 - s 删除单个字符并进入insert
 - S 删除光标前的所有字符并进入insert2
-- easymotion
-  - space space w/e/b/ge  
-  - space space space j
 - gd + ctrl o 查看引用位置并返回
 - m 大写 / m 小写 多文件 & 单文件操作
 - ’ 跳转
@@ -32,37 +29,18 @@
   - normal
     - gu 小写
     - gU  大写
-
   - 可视化
     - u
     - U
-
-  - 互换
-    - ⭐~
-- 注释
-
-  - gc 单行
-  - gC 多行  搭配可视化
 - 窗口切换
 
   - vim
     - 新建
       - C-w v
       - C-w s
-
-    - 切换
-      - C-w hjkl
-      - C-w w(切换到另一个窗口)
-
     - 关闭
       - C-w c
-
-  - vscode
-    - 关闭
-      - alt `
 - 处理语句块
-
-  - %括号匹配
 
   - vaI / vai / vii
 
