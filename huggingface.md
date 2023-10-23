@@ -3,14 +3,14 @@
 ```
 模型复杂度
 	复杂度越高，产生输出的速度越慢
-	
+
 泛化能力 在未见过的数据上的表现能力
-学习能力 
+学习能力
 	从数据中自动提取有用信息的能力
 	能力越强，消耗的资源越大，产生的速度越慢
 非线性 模型对复杂函数的拟合能力
-鲁棒性 
-可扩展性 
+鲁棒性
+可扩展性
 灵活性
 计算资源
 ```
@@ -30,21 +30,21 @@ Translation
 
 ## how pipeline run
 
-![image-20231010081247194](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081247194.png)
+![image-20231010081247194](\gallery\image-20231010081247194.png)
 
-![image-20231010081316489](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081316489.png)
+![image-20231010081316489](\galleryimage-20231010081316489.png)
 
 
 
-![image-20231010080706422](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081222608.png)
+![image-20231010080706422](\galleryimage-20231010081222608.png)
 
-![image-20231010081536104](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081536104.png)
+![image-20231010081536104](\galleryimage-20231010081536104.png)
 
-![image-20231010081552901](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081552901.png)
+![image-20231010081552901](\galleryimage-20231010081552901.png)
 
-![image-20231010081619045](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081619045.png)
+![image-20231010081619045](\galleryimage-20231010081619045.png)
 
-![image-20231010081641866](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010081641866.png)
+![image-20231010081641866](\galleryimage-20231010081641866.png)
 
 # Carbon footprint
 
@@ -81,7 +81,7 @@ encoder-decoder / sequence2sequence transformer
 Definition
 	encoder擅长序列分类(analyze the sentiment of sequence)
 		Sentiment analysis 情感分析
-	
+
     BERT是仅有encoder的流行模型，基础bert维度为768
 
     对传递的每一个单词均有一个向量(数组)，每一个都是相关单词的数字表示，拥有一定的维度(特征数量),由不同技术的架构定义
@@ -130,17 +130,17 @@ Feature
 
 # Instantiate transform model
 
-V![image-20231010083800501](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010083800501.png)
+V![image-20231010083800501](\galleryimage-20231010083800501.png)
 
-![image-20231010084047691](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010084047691.png)
+![image-20231010084047691](\galleryimage-20231010084047691.png)
 
-![image-20231010084026494](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010084026494.png)
+![image-20231010084026494](\galleryimage-20231010084026494.png)
 
-![image-20231010084136265](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010084136265.png)
+![image-20231010084136265](\galleryimage-20231010084136265.png)
 
-![image-20231010084331336](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010084331336.png)
+![image-20231010084331336](\galleryimage-20231010084331336.png)
 
-![image-20231010084412498](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010084412498.png)
+![image-20231010084412498](\galleryimage-20231010084412498.png)
 
 # Tokenizers
 
@@ -152,7 +152,7 @@ V![image-20231010083800501](C:\Users\16193\AppData\Roaming\Typora\typora-user-im
   泛化能力弱，大量信息丢失
   ```
 
-  
+
 
 - character-based 基于字符
 
@@ -162,7 +162,7 @@ V![image-20231010083800501](C:\Users\16193\AppData\Roaming\Typora\typora-user-im
   单个标记的信息密度低，信息量少
   ```
 
-  
+
 
 - subword-based 基于子词
 
@@ -171,12 +171,12 @@ V![image-20231010083800501](C:\Users\16193\AppData\Roaming\Typora\typora-user-im
   更强的泛化、理解能力
   ```
 
-  ![image-20231010090056237](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010090056237.png)
+  ![image-20231010090056237](\galleryimage-20231010090056237.png)
 
-  ![image-20231010090402975](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010090402975.png)
+  ![image-20231010090402975](\galleryimage-20231010090402975.png)
 
-![image-20231010090517419](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010090517419.png)
+![image-20231010090517419](\galleryimage-20231010090517419.png)
 
-![image-20231010090636059](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010090636059.png)
+![image-20231010090636059](\galleryimage-20231010090636059.png)
 
-![image-20231010090719862](C:\Users\16193\AppData\Roaming\Typora\typora-user-images\image-20231010090719862.png)
+![image-20231010090719862](\galleryimage-20231010090719862.png)
