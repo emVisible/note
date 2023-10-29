@@ -1,4 +1,552 @@
-# 图片模型训练和使用的基本流程
+
+
+# *正则
+
+> 很多NLP问题可以通过正则来解决
+>
+> 学习NLP之前，先学习正则，尽量简化问题，而不是把问题搞复杂
+
+基础包：re
+
+高级API包：regex
+
+```
+re.findall(regex, text)
+```
+
+---
+
+## 原文档整理
+
+A regular expression (or RE) specifies a set of strings that matches it.
+
+- Unicode string(str)和8-bit
+- 使用r string来表示raw data
+- 调用API可以使用regex包
+- 复杂的大型正则可以拆分为多个小型正则
+- before a newline == end of the line selected
+
+Grammar
+
+```
+. 默认不匹配newline. If the DOTALL flag has been specified, this matches any character including a newline.
+$ searching for a single $ in 'foo\n' will find two (empty) matches: one just before the newline, and one at the end of the string.
+```
+
+Schema
+
+- non-greedy 非贪婪模式
+
+- Multiline 多行模式
+
+- *+?默认为贪婪模式
+
+  ```
+  非贪婪模式
+  *?
+  +?
+  ??
+  ```
+
+- {m,n}? 尽可能少的匹配，有m个就不匹配n个
+
+- {m,n}+ 尽可能多的匹配，有n个就不匹配m个，非回溯匹配
+
+Example
+
+- ```
+  a{4,}b
+  ```
+
+
+
+# NLP
+
+> 参考教程地址：
+>
+> https://www.youtube.com/watch?v=R-AG4-qZs1A&list=PLeo1K3hjS3uuvuAXhYjV2lMEShq2UYSwX
+>
+> 特点：
+>
+>  	1. 直观
+>      1. 编码练习
+>      1. 端到段项目练习
+>      1. 真实行业现状以及使用
+
+## NLP的实际应用
+
+核心：定向信息提取
+
+1. Gmail 邮件过滤 => 短信过滤 => 信息特征提取 && 判断 && 过滤
+2. 自然语言翻译。
+3. 客服机器人。
+4. 语音助手。Amazon、Alexa、Google Assistant
+5. google搜索。使用BERT，提高结果精度
+6. 新闻标题自动生成。 
+
+---
+
+## 索引
+
+推荐书
+
+- Practical Natural Language Processing
+
+预训练模型
+
+- Fasttext
+- Tensorflow Hub
+- GPT3
+
+开源包
+
+- spaCy
+- Gensim
+- NLTK
+- scikit learn
+- TensorFlow && PyTorch
+- Hugging Face
+- zoom
+- Kaggle
+- Stack Overflow
+
+云服务
+
+- AWS
+- Azure
+- Google Cloud
+
+学习资源
+
+- Youtube
+- Bootcamps
+- uUdemy
+- coursera
+- towards data science
+- 正则： regex101.com
+
+大型公司加持
+
+- Google
+  - TensorFlow
+  - BERT
+  - TPU
+  - google home
+  - google cloud
+- AWS
+  - Amazon SageMaker 
+  - amazon echo dot
+
+- Meta
+  - PyTorch
+  - fastText
+
+---
+
+## 术语(Jargon)
+
+基本词 (Lemma)
+
+```
+eat 是 ate 的基本词
+eat is ate's lemma
+```
+
+词性 POS (Part Of SPeech)
+
+```
+名词					Noun
+动词 					Verb
+代词 					Pronoun
+形容词				   Adjective
+副词				    Adverb
+感叹词				   Interjection
+连词					Conjunction
+介词(链接名词)		  Adposition |Preposition
+```
+
+分词 Token
+
+分词器 Tokenizer
+
+命名实体识别(Named Entity Recognition, NER)
+
+- 构建NER模型
+
+  ```
+  1 硬编码 + 手动添加
+  2 基于规则的NER(spacy自带EntityRuler)
+  	正则
+  	自定义规则
+  3 机器学习(CRF && BERT)
+  ```
+
+文本表示(Text Representation)
+
+稀疏表示法(Sparse Representation)
+
+- 0多但不重要，1少但重要
+
+- 缺点
+  - 浪费硬件资源
+  - 不能准确转化语意(近义词)
+
+稀疏矩阵(Sparse Matrix)
+
+停用词(STOP Words)
+
+- 预处理阶段概念
+
+- 常用的，同程序的正确率无关的词语，如
+
+  ```
+  to a from the had
+  ```
+
+- 停用词需要分场合和具体情况使用，如以下使用not为停用词会出现错误
+
+  ```
+  this is a good movie
+  this is not a good movie
+  ```
+
+- 在Chat bot && QA && Language Translation等场合不适用
+
+过拟合
+
+- 模型在训练数据上的表现 比 在以前从未见过的数据上的表现要更好，泛化能力过弱，只能比较好的处理见过的
+
+## NLP的一般流程
+
+> 数据采集
+>
+> 数据清理
+>
+> 数据预处理
+>
+> 特征工程
+>
+> 模型构建
+>
+> 模型评估
+
+大致流程可解释为：数据采集—分词—向量化—建模—
+
+### 数据采集(data acquisition)
+
+采集原始数据
+
+- 数据的质量奠定了大楼的根基，奠定了质量的上限
+
+### 文本提取 && 文本清理(text extraction && text cleanup)
+
+清理不需要的数据并改正错误数据
+
+- 有效信息提取
+- 对错误信息进行修复
+
+### 预处理(pre-processing)
+
+
+
+1. 分句(sentence tokenization / sentence segmentation)
+
+   - 核心是创建句子过滤器(sentence filter && sentence tokenizer)，以处理和应对特殊语句和情况
+
+2. 分词(word tokenization / tokenization)
+
+   *词干分析使用NLTK, spacy不支持词干分析; spacy仅支持词形还原
+
+   - 词干提取(Stemming)
+
+     - 将同义词、不同语态和时态的相同的词映射到基本词（词包括基本词，比如loved=>love, eating=>eat）
+
+       ```
+       Use fixed rules such as remove able, ing etc. to derive a base word
+       ```
+
+   - 词形还原(Lemmatization)
+
+     - 将同义词、不同语态和时态的相同的词映射到基本词（词不包括基本词，比如ate=>eat, ran=>run）
+
+       ```
+       Use knowledge of a language (a.k.a.linguistic knowledge)to derive a base word
+       ```
+
+---
+
+> 计算机当然不会理解文本，所以需要转成数字的方式让计算机可以"理解"。这就是特征工程(feature engineering)。
+
+---
+
+### 特征工程(feature engineering) && 文本表示(Text Representation)
+
+> 文本转向量
+
+以适当的方式表示单词，从原始数据(文本)中提取特征，转换为数字向量。
+
+特征工程的质量，相对于计算算法，会产生更大的能效。其地位实际上应该仅次于高质量的数据采集 && 处理。
+
+将文本转为向量，成为向量空间模型(Vector space model)。
+
+- *Label Encoding
+
+  ```
+  Create a vocabulary that need.
+  ```
+
+- *One Hot Encoding
+
+  ```
+  在拥有检测词库的前提下，对每一个token和词库进行一一比较。
+  两条线确定一个点
+  
+  缺点：
+  	不能准确的捕捉单词的语义 语义近似的单词没有近似的向量表示
+  	硬件资源浪费
+  	难以泛化 OOV(Out Of Vocabulary) 匹配的词汇量不足
+  	长度不固定
+  ```
+
+- Bag of Words 词袋模型
+
+  ```
+  升级版本的独热编码，同样的拥有vocabulary，对检测的token进行了lemmatization，并以句子作为单位进行检测。
+  
+  模型训练的时候，训练的源数据往往并不长，NLP一般提取的是其少数关键词汇。通过计数向量化器，每个Source为独立的一个向量(这也符合词汇长度普遍不长的特点)，其会同vocabulary进行比较
+  ```
+
+  ```
+  自动提取实体，并将其标注到文章内
+  ```
+
+- TF-IDF Vectorizer
+
+- Word Embedding
+
+---
+
+### 模型构建(model building)
+
+通过各类不同的手段，最终创建分类器(classifier
+
+- Naive Bayes Classifier
+- SVM
+- Random Forest
+
+### 模型评估(Evaluating)
+
+Confusing Maxtrix
+
+### ...下一步
+
+循环(预处理=>特征工程=>模型构建=>模型评估)
+
+- 对评估后得出的结果进行再应用，不断完善模型，
+
+部署
+
+监视 && 迭代
+
+### 代码展示
+
+```
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
+'''
+    整体流程
+      1. 数据采集。读取csv数据
+      2. 文本提取。
+          通过代码添加结果列
+          手工分为数据集和测试集
+      3. 预处理(跳过, 数据已经处理好)
+      4. 特征工程。
+          创建计数向量化器
+          转化训练集数据为向量(fit_transform)
+          转化测试集数据为向量(transform)
+      5. 模型构建。
+          创建分类器
+          训练模型(fit)
+      6. 模型预估。
+          测试集预测&&报告
+            将训练好的模型对测试集进行预测
+            使用classification_report展示测试结果
+          外部数据预测
+            使用非训练&&测试数据的数据进行预测
+'''
+
+doc = pd.read_csv('./spam.csv')
+
+doc['spam'] = doc['Category'].apply(lambda x: 1 if x == 'spam' else 0)
+x_train, x_test, y_train, y_test = train_test_split(doc.Message, doc.spam, test_size=0.2)
+
+count_vectorizor = CountVectorizer()
+x_train_vector = count_vectorizor.fit_transform(x_train.values)
+x_test_vector = count_vectorizor.transform(x_test)
+
+model = MultinomialNB()
+model.fit(x_train_vector, y_train)
+
+y_test_predict = model.predict(x_test_vector)
+classification_report(y_test ,y_test_predict)
+
+useModel = [
+    "I'm still looking for a car to buy. And have not gone 4the driving test yet.",
+    "UpgrdCentre Orange customer, you may now claim your FREE CAMERA PHONE upgrade for your loyalty. Call now on 0207 153 9153. Offer ends 26th July. T&C's apply. Opt-out available"
+]
+
+result = model.predict(count_vectorizor.transform(useModel))
+print(result)
+```
+
+
+
+## Spacy
+
+> spacy   https://spacy.io
+
+```
+========================初始化========================
+import spacy
+
+模型加载
+nlp = spacy.load("en_core_web_sm") # 加载预训练模型（需要提前下载）
+nlp = spacy.blank("en")# 加载空模型（支持的语言均可传入）
+
+获取doc
+doc = nlp("...") # 传入文本对象
+
+
+========================分词(Tokenization)========================
+
+分词
+token = doc[1] # 返回句子中对应位置的token
+tokens = [token for token in doc]
+
+获取词性
+token.pos_
+spacy.explain(token.pos_) # human-readable
+
+获取原词
+token.lemma_
+
+命名体识别(Name Entity Recognize)
+doc = nlp("Tesla Inc is going to acquire twitter for $45 billion")
+for ent in doc.ents:
+    print(ent.text, ent.label_) # 获取文本和标签
+
+NER渲染显示
+from spacy import displacy
+displacy.render(doc, style="ent")
+    
+
+获取指定格式
+token.text # 返回字符
+
+判断
+token.is_alpha
+token.like_num
+token.is_currency # 特殊字符
+token.i # 索引
+token.is_punct # 标点
+token.like_email
+
+
+从句子中拆分词
+    for sentence in doc.sents:
+        for word in sentence:
+            pass
+读取文本
+	with open("xxx.txt") as f:
+    	text = f.readlines()
+    text = " ".join(text)
+    
+自定义tokenizer # 对于gimme添加额外规则——拆分为gim和me两个单词
+from spacy.symbols import ORTH
+nlp = spacy.blank("en")
+nlp.tokenizer.add_special_case("gimme", [
+    {ORTH: "gim"},
+    {ORTH: "me"},
+])
+doc = nlp("gimme double cheese extra large healthy pizza")
+tokens = [token.text for token in doc]
+# ['gim', 'me', 'double', 'cheese', 'extra', 'large', 'healthy', 'pizza']
+
+========================分句(Sentence Tokenization / Segmentation)========================
+# 分句前必须添加对应处理分句的pipeline
+nlp.add_pipe('sentencizer')
+
+分句
+    for sentence in doc.sents:
+        pass
+
+========================管道（Pipeline）========================
+获取预训练模型/加载的pipeline
+nlp.pipeline
+
+管道添加（基于blank pipeline）
+source_nlp = spacy.load("en_core_web_sm")
+
+nlp = spacy.blank("en")
+nlp.add_pipe("ner", source=source_nlp)
+nlp.pipe_names
+
+```
+
+<img src="C:\Users\young\AppData\Roaming\Typora\typora-user-images\image-20231029224517126.png" alt="image-20231029224517126" style="zoom:60%;" />
+
+spacy案例
+
+```
+1结构化段落的URL
+text='''
+Look for data to help you address the question. Governments are good
+sources because data from public research is often freely available. Good
+places to start include http://www.data.gov/, and http://www.science.
+gov/, and in the United Kingdom, http://data.gov.uk/.
+Two of my favorite data sets are the General Social Survey at http://www3.norc.org/gss+website/, 
+and the European Social Survey at http://www.europeansocialsurvey.org/.
+'''
+
+doc = nlp(text)
+data_websites = [token.text for token in doc if token.like_url ] 
+
+# ==============================
+
+
+2句子中的货币量和单位
+transactions = "Tony gave two $ to Peter, Bruce gave 500 € to Steve"
+doc = nlp(transactions)
+for token in doc:
+    if token.like_num and doc[token.i+1].is_currency:
+        print(token.text, doc[token.i+1].text)        
+```
+
+
+
+## NLTK
+
+> NLTK
+
+```
+from nltk.tokenize import sent_tokenize, word_tokenize
+
+import nltk
+
+nltk.download('punkt')
+分词
+	sent_tokenize("...")
+	word_tokenize("...")
+
+```
+
+# CV
+
+## 模型训练一般流程（图片）
 
 1. 导入数据集
 
@@ -60,99 +608,4 @@
    <START> this film was just brilliant casting location scenery story direction everyone's really suited the part they played and you could just imagine being there robert <UNK> is an amazing actor and now the same being director <UNK> father came from the same scottish island as myself so i loved the fact there was a real connection with this film the witty remarks throughout the film were great it was just brilliant so much that i bought the film as soon as it was released for <UNK> and would recommend it to everyone to watch and the fly fishing was amazing really cried at the end it was so sad and you know what they say if you cry at a film it must have been good and this definitely was also <UNK> to the two little boy's that played the <UNK> of norman and paul they were just brilliant children are often left out of the <UNK> list i think because the stars that play them all grown up are such a big profile for the whole film but these children are amazing and should be praised for what they have done don't you think the whole story was so lovely because it was true and was someone's life after all that was shared with us all
    ```
 
-   # 过拟合
    
-   模型在训练数据上的表现 比 在以前从未见过的数据上的表现要更好。
-
----
-
-# NLP Tutorial Python
-
-> 地址：
->
-> https://www.youtube.com/watch?v=R-AG4-qZs1A&list=PLeo1K3hjS3uuvuAXhYjV2lMEShq2UYSwX
->
-> 特点：
-> 	1. 直观
-> 	1. 编码练习
-> 	1. 端到段项目练习
-> 	1. 真实行业现状以及使用
-
-推荐的书
-
-- Practical Natural Language Processing
-
-- 其两位作者也是大佬，在油管有帐号
-
-实际应用举例
-
-1. Gmail 邮件过滤 => 短信过滤 => 信息特征提取 && 判断 && 过滤
-2. 自然语言翻译。
-3. 客服机器人。
-4. 语音助手。Amazon、Alexa、Google Assistant
-5. google搜索。使用BERT，提高结果精度
-6. 新闻标题自动生成。 
-
----
-
-免费可用预训练模型
-
-- Fasttext
-- Tensorflow Hub
-- GPT3
-
-开源系统
-
-- spaCy
-- Gensim
-- NLTK
-- scikit learn
-- TensorFlow && PyTorch
-- Hugging Face
-- zoom
-- Kaggle
-- Stack Overflow
-
-硬件资源（GPU）
-
-- AWS
-- Azure
-- Google Cloud
-
-学习资源
-
-- Youtube
-- Bootcamps
-- uUdemy
-- coursera
-- towards data science
-
-大型公司加持
-
-- Google
-  - TensorFlow
-  - BERT
-  - TPU
-  - google home
-  - google cloud
-- AWS
-  - Amazon SageMaker 
-  - amazon echo dot
-
-- Meta
-  - PyTorch
-  - fastText
-
----
-
-> 很多NLP问题可以通过正则来解决
->
-> 学习NLP之前，先学习正则，尽量简化问题
->
-> 资源： regex101.com
-
-用户机器人
-
-
-
-信息提取
