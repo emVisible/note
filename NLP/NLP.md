@@ -69,9 +69,9 @@ Example
 > 特点：
 >
 >  	1. 直观
->      1. 编码练习
->      1. 端到段项目练习
->      1. 真实行业现状以及使用
+>  	 1. 编码练习
+>  	 1. 端到段项目练习
+>  	 1. 真实行业现状以及使用
 
 ## NLP的实际应用
 
@@ -145,41 +145,11 @@ Example
 
 ## 术语(Jargon)
 
-基本词 (Lemma)
-
-```
-eat 是 ate 的基本词
-eat is ate's lemma
-```
-
-词性 POS (Part Of SPeech)
-
-```
-名词					Noun
-动词 					Verb
-代词 					Pronoun
-形容词				   Adjective
-副词				    Adverb
-感叹词				   Interjection
-连词					Conjunction
-介词(链接名词)		  Adposition |Preposition
-```
+### 基本概念
 
 分词 Token
 
 分词器 Tokenizer
-
-命名实体识别(Named Entity Recognition, NER)
-
-- 构建NER模型
-
-  ```
-  1 硬编码 + 手动添加
-  2 基于规则的NER(spacy自带EntityRuler)
-  	正则
-  	自定义规则
-  3 机器学习(CRF && BERT)
-  ```
 
 文本表示(Text Representation)
 
@@ -193,7 +163,52 @@ eat is ate's lemma
 
 稀疏矩阵(Sparse Matrix)
 
-停用词(STOP Words)
+过拟合(Overfitting)
+
+- 模型在训练数据上的表现 比 在以前从未见过的数据上的表现要更好，泛化能力过弱，只能比较好的处理见过的
+
+### 基本词 (Lemma)
+
+```
+eat 是 ate 的基本词
+eat is ate's lemma
+```
+
+### 词性 POS (Part Of Speech)
+
+```
+名词					Noun
+动词 					Verb
+代词 					Pronoun
+形容词				   Adjective
+副词				    Adverb
+感叹词				   Interjection
+连词					Conjunction
+介词(链接名词)		  Adposition |Preposition
+```
+
+### 命名实体识别(Named Entity Recognition, NER)
+
+- 构建NER模型
+
+  ```
+  1 硬编码 + 手动添加
+  2 基于规则的NER(spacy自带EntityRuler)
+  	正则
+  	自定义规则
+  3 机器学习(CRF && BERT)
+  ```
+
+- label_ 
+
+  ```
+  Tesla Inc  |  ORG  |  Companies, agencies, institutions, etc.
+  $45 billion  |  MONEY  |  Monetary values, including unit
+  ```
+
+  
+
+### 停用词(STOP Words)
 
 - 预处理阶段概念
 
@@ -211,10 +226,6 @@ eat is ate's lemma
   ```
 
 - 在Chat bot && QA && Language Translation等场合不适用
-
-过拟合
-
-- 模型在训练数据上的表现 比 在以前从未见过的数据上的表现要更好，泛化能力过弱，只能比较好的处理见过的
 
 ## NLP的一般流程
 
@@ -246,8 +257,6 @@ eat is ate's lemma
 - 对错误信息进行修复
 
 ### 预处理(pre-processing)
-
-
 
 1. 分句(sentence tokenization / sentence segmentation)
 
@@ -310,14 +319,34 @@ eat is ate's lemma
 
 - Bag of Words 词袋模型
 
+  在 Bag of Words 模型中，文本被表示为一个包含单词频率的向量，其中每个单词都对应一个维度。其实现简单易懂、易于实现和计算效率高。
+
+  模型假定文本中的含义来自于单词的出现频率，而忽略了单词的顺序和语法结构。不能有效捕捉上下文信息和语义关联。
+
+  这意味着文本被看作一个“袋子”（即Bag），其中单词的出现顺序并不重要，只有单词的出现与否以及出现的频率对最终的表示起作用。
+
+  会产生非常稀疏的高维向量，面对大规模文本语料库时，存储和计算开销较高。
+
   ```
   升级版本的独热编码，同样的拥有vocabulary，对检测的token进行了lemmatization，并以句子作为单位进行检测。
   
-  模型训练的时候，训练的源数据往往并不长，NLP一般提取的是其少数关键词汇。通过计数向量化器，每个Source为独立的一个向量(这也符合词汇长度普遍不长的特点)，其会同vocabulary进行比较
+  模型训练的时候，训练的源数据往往并不长，NLP一般提取的是其少数关键词汇。
+  
+  通过计数向量化器，每个Source为独立的一个向量(这也符合词汇长度普遍不长的特点)，其会同vocabulary进行比较。
   ```
 
   ```
-  自动提取实体，并将其标注到文章内
+  词袋模型的构建流程
+      构建词汇表：
+          首先，从文本语料库中提取所有不同的单词，并将其作为词汇表的一部分。
+          每个单词都对应一个唯一的标识符。
+  
+      计算单词频率：
+          对于给定的文本文档，计算每个单词在文档中出现的次数。
+  
+      构建向量表示：
+          根据词汇表中单词的顺序，将文档表示为一个向量，其中向量的每个元素对应一个单词在文档中出现的频率。
+          这个向量被称为文档的 Bag of Words 表示。
   ```
 
 - TF-IDF Vectorizer
@@ -403,11 +432,26 @@ result = model.predict(count_vectorizor.transform(useModel))
 print(result)
 ```
 
+## 常见问题
+
+提取公司名称
+
+```
+通过构建词汇表
+```
 
 
-## Spacy
+
+## spacy
 
 > spacy   https://spacy.io
+
+
+
+- 通过token.label_，筛选具体类别的事物（位置、人、日期...）
+- 通过token.tag_
+- 通过spacy.explain()，使
+- 通过token.pos_
 
 ```
 ========================初始化========================
@@ -427,22 +471,63 @@ doc = nlp("...") # 传入文本对象
 token = doc[1] # 返回句子中对应位置的token
 tokens = [token for token in doc]
 
-获取词性
+获取词性，可提取不同词性的词
 token.pos_
 spacy.explain(token.pos_) # human-readable
+# 获取计数统计
+count = doc.count_by(spacy.attrs.POS)
+for k,v in count.items():
+	print(doc.vocab[k].text, v)
+    NOUN 96
+    VERB 27
+    ADV 15
+    ADP 39
+    PROPN 16
+    PUNCT 32
+    DET 34
+    PRON 4
+    AUX 13
+    CCONJ 10
+    ADJ 23
+    SPACE 7
+    NUM 19
+    PART 4
+    SCONJ 8
+    X 1
 
-获取原词
+获取标签
+token.tag_
+spacy.explain(token.tag_)
+
+词形还原
 token.lemma_
 
 命名体识别(Name Entity Recognize)
 doc = nlp("Tesla Inc is going to acquire twitter for $45 billion")
 for ent in doc.ents:
     print(ent.text, ent.label_) # 获取文本和标签
+# 列出所有实体
+nlp.pipe_labels['ner']
 
-NER渲染显示
+# NER渲染显示
 from spacy import displacy
 displacy.render(doc, style="ent")
-    
+
+# 自定义NER
+from spacy.tokens import Span
+doc = nlp("Tesla is going to acquire Twitter for $45 billion")
+for ent in doc.ents:
+    print(ent.text, " | ", ent.label_)
+s1 = Span(doc, 0, 1, label="ORG")
+s2 = Span(doc, 5, 6, label="ORG")
+
+doc.set_ents([s1, s2], default="unmodified")
+for ent in doc.ents:
+    print(ent.text, " | ", ent.label_)
+
+Tesla  |  ORG
+Twitter  |  ORG
+$45 billion  |  MONEY
 
 获取指定格式
 token.text # 返回字符
@@ -460,6 +545,7 @@ token.like_email
     for sentence in doc.sents:
         for word in sentence:
             pass
+
 读取文本
 	with open("xxx.txt") as f:
     	text = f.readlines()
@@ -495,6 +581,20 @@ nlp = spacy.blank("en")
 nlp.add_pipe("ner", source=source_nlp)
 nlp.pipe_names
 
+========================词形还原Lemmatization========================
+token.lemma_
+
+# 自定义lemmatizer，处理特殊情况。指定：将Bro和Brah还原为Brother
+nlp = spacy.load("en_core_web_sm")
+ar = nlp.get_pipe('attribute_ruler')
+
+ar.add([[{"TEXT":"Bro"}],[{"TEXT":"Brah"}]],{"LEMMA":"Brother"})
+
+doc = nlp("Bro, you wanna go? Brah, don't say no! I am exhausted")
+for token in doc:
+    print(token.text, "|", token.lemma_)
+# 将所有词拼起来，结果就是原句子的单词还原版
+final_base_text = ' '.join(all_base_words)
 ```
 
 <img src="C:\Users\young\AppData\Roaming\Typora\typora-user-images\image-20231029224517126.png" alt="image-20231029224517126" style="zoom:60%;" />
@@ -524,6 +624,10 @@ doc = nlp(transactions)
 for token in doc:
     if token.like_num and doc[token.i+1].is_currency:
         print(token.text, doc[token.i+1].text)        
+        
+# ===============================
+for k,v in count.items():
+    print(doc.vocab[k].text, "|",v)
 ```
 
 
@@ -542,7 +646,19 @@ nltk.download('punkt')
 	sent_tokenize("...")
 	word_tokenize("...")
 
+
+==============词干提取=================
+from nltk.stem import PorterStemmer
+stemmer = PorterStemmer()
+lst_words = ['running', 'painting', 'walking', 'dressing', 'likely', 'children', 'whom', 'good']
+for word in lst_words:
+	stemmer.stem(word)
+
 ```
+
+## sklearn
+
+
 
 # CV
 
@@ -607,5 +723,3 @@ nltk.download('punkt')
    ```
    <START> this film was just brilliant casting location scenery story direction everyone's really suited the part they played and you could just imagine being there robert <UNK> is an amazing actor and now the same being director <UNK> father came from the same scottish island as myself so i loved the fact there was a real connection with this film the witty remarks throughout the film were great it was just brilliant so much that i bought the film as soon as it was released for <UNK> and would recommend it to everyone to watch and the fly fishing was amazing really cried at the end it was so sad and you know what they say if you cry at a film it must have been good and this definitely was also <UNK> to the two little boy's that played the <UNK> of norman and paul they were just brilliant children are often left out of the <UNK> list i think because the stars that play them all grown up are such a big profile for the whole film but these children are amazing and should be praised for what they have done don't you think the whole story was so lovely because it was true and was someone's life after all that was shared with us all
    ```
-
-   
