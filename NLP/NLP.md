@@ -464,6 +464,19 @@ nlp = spacy.blank("en")# 加载空模型（支持的语言均可传入）
 获取doc
 doc = nlp("...") # 传入文本对象
 
+从文件获取text
+import pandas as pd
+df = pd.read_csv("")
+
+# 获取前几项
+df.head()
+
+# 检查目标标签是否平衡
+df.Category.value_counts()
+
+# 文本处理
+df['列名'].apply(lambda x: 1 if x == 'spam' else 0)
+
 
 ========================分词(Tokenization)========================
 
@@ -595,6 +608,20 @@ for token in doc:
     print(token.text, "|", token.lemma_)
 # 将所有词拼起来，结果就是原句子的单词还原版
 final_base_text = ' '.join(all_base_words)
+
+========================停用词========================
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS
+# 打印停用词
+print(len(STOP_WORDS))
+doc = "We just opened our wings,the flying part is coming soon"
+nlp = spacy.load("en_core_web_sm")
+doc = nlp(doc)
+
+for token in doc:
+    if token.is_stop:
+        print(token)
+
 ```
 
 <img src="C:\Users\young\AppData\Roaming\Typora\typora-user-images\image-20231029224517126.png" alt="image-20231029224517126" style="zoom:60%;" />
@@ -657,6 +684,115 @@ for word in lst_words:
 ```
 
 ## sklearn
+
+使用 sklearn 库实现朴素贝叶斯文本分类器（Naive Bayes Classifier）进行垃圾邮件过滤
+
+```
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
+
+# ====================特征工程=====================
+
+# train_test分割, 使用20%数据作为测试集
+X_train, X_test, y_train, y_test = train_test_split(df.Message, df.spam, test_size=0.2)
+
+# 初始化一个 CountVectorizer 对象
+v = CountVectorizer()
+
+# 使用 CountVectorizer 对训练集文本数据进行向量化
+X_train_cv = v.fit_transform(X_train.values)
+
+# 将向量化后的训练集数据转换为 NumPy 数组形式
+X_train_np = X_train_cv.toarray()
+
+# ===================初始化模型=====================
+
+# 初始化一个 MultinomialNB 朴素贝叶斯模型
+model = MultinomialNB()
+
+# ====================训练=========================
+
+# 使用训练集数据进行模型训练
+model.fit(X_train_cv, y_train)
+
+# =====================测试=========================
+# 对测试集数据进行向量化
+X_test_cv = v.transform(X_test)
+
+# 使用模型对测试集进行预测
+y_pred = model.predict(X_test_cv)
+
+# 打印分类报告
+print(classification_report(y_test, y_pred))
+
+# ====================应用=========================
+# 对新的邮件数据进行分类
+emails = [
+    'Hey mohan, can we get together to watch footbal game tomorrow?',
+    'Upto 20% discount on parking, exclusive offer just for you. Dont miss this reward!'
+]
+
+# 对新的邮件数据进行向量化
+emails_count = v.transform(emails)
+
+# 使用模型进行预测
+model.predict(emails_count)
+
+# ==============================================================================
+# ============================基于管道实现========================================
+# ==============================================================================
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+
+# 特征工程
+X_train, X_test, y_train, y_test = train_test_split(df.Message, df.spam, test_size=0.2)
+
+# 特征工程 && 建模
+clf = Pipeline([
+    ('vectorizer', CountVectorizer()),
+    ('nb', MultinomialNB())
+])
+
+# 训练
+clf.fit(X_train, y_train)
+
+# 应用
+y_pred = clf.predict(X_test)
+
+print(classification_report(y_test, y_pred))
+```
+
+使用基于KNN的Pipeline
+
+```
+clf = Pipeline([
+	('vectorizer', CountVectorizer()),
+	('KNN', (KNeighborClassifier(n_neighbors=10, metric='euclidean')))
+])
+clf.fit(x_train, y_train)
+
+y_pred = clf.predict(x_test)
+
+classification.report(y_test, y_pred)
+```
+
+使用基于朴素贝叶斯的Pipeline
+
+```
+clf = Pipeline([
+	('vectorizer', CountVectorizer()),
+    ('Multi NB', MultinomialNB())   #using the Multinomial Naive Bayes classifier
+])
+clf.fit(x_train, y_train)
+
+y_pred = clf.predict(x_test)
+
+classification.report(y_test, y_pred)
+```
 
 
 
