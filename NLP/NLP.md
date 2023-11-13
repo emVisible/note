@@ -147,6 +147,28 @@ Example
 
 ### 基本概念
 
+文档 Document
+
+- 一段文本、一个段落、一篇新闻文章等等都从属于文档的概念
+
+向量
+
+- 本质上就是一堆数字。在Python中可以简单理解为list
+
+拟合
+
+- 模型拟合数据后，数据就是模型的corpus，也就是词汇库
+
+训练-测试 分割(Train-Test Split)
+
+- 将数据分为训练集和测试集
+
+不平衡(Imbalance)
+
+```
+在机器学习中，不平衡问题（Imbalance Problem）指的是在训练数据中不同类别的样本数量差异很大的情况。通常情况下，一些类别的样本数量远远多于其他类别，导致模型在训练过程中更容易学到多数类别的特征，而对于少数类别的学习不足。这种不平衡可能会影响模型的性能，尤其是在处理二分类问题时。
+```
+
 分词 Token
 
 分词器 Tokenizer
@@ -166,6 +188,10 @@ Example
 过拟合(Overfitting)
 
 - 模型在训练数据上的表现 比 在以前从未见过的数据上的表现要更好，泛化能力过弱，只能比较好的处理见过的
+
+词汇量问题(Out of Vocabulary, OOV)
+
+- 文本转向量时，模型的词汇库中没有待转换的单个或者多个词汇
 
 ### 基本词 (Lemma)
 
@@ -227,6 +253,23 @@ eat is ate's lemma
 
 - 在Chat bot && QA && Language Translation等场合不适用
 
+### 多元语法(N-Gram)
+
+多元语法通过移动窗口(Moving window)使得原本单一词对应单一token变为多个词对应一个token。
+
+词袋模型是N-Gram的特例(N = 1)、二元语法(Bi-Gram, N=2)、三元语法(Ti-Gram, N=3)
+
+Gram模型基于文本中词语的组合，将连续的n个词语视为一个单元，构建了一个基于这些单元的统计模型
+
+
+
+局限性
+
+- 随着元数增加，模型稀疏性会提高
+- 没有解决词汇量不足的问题
+
+
+
 ## NLP的一般流程
 
 > 数据采集
@@ -242,6 +285,10 @@ eat is ate's lemma
 > 模型评估
 
 大致流程可解释为：数据采集—分词—向量化—建模—
+
+数据流：
+
+​	文档==---预处理---==>后处理文本---==>词袋模型/计数向量化模型(词频计算)=>
 
 ### 数据采集(data acquisition)
 
@@ -348,6 +395,8 @@ eat is ate's lemma
           根据词汇表中单词的顺序，将文档表示为一个向量，其中向量的每个元素对应一个单词在文档中出现的频率。
           这个向量被称为文档的 Bag of Words 表示。
   ```
+
+  
 
 - TF-IDF Vectorizer
 
@@ -792,6 +841,153 @@ clf.fit(x_train, y_train)
 y_pred = clf.predict(x_test)
 
 classification.report(y_test, y_pred)
+```
+
+
+
+## 具体任务
+
+### 自动提取 / 标记类别
+
+```
+import pandas as pd
+...
+df.[column-name].value_counts()
+```
+
+
+
+### 读取JSON文件
+
+```
+import pandas as pd
+df = pd.read_json("path.json")
+
+df.shape
+df.head()
+```
+
+### 列文本-数字映射 / 创建新列
+
+```
+target = {
+	"CATEGORYA": 0,
+	"CATEGORYB": 1,
+	...
+}
+# 将平衡的数据的column-name列通过target映射表进行映射，结果设置到数据的new_column上
+df_balanced['new_column'] = df_balanced.['column-name'].map(target)
+```
+
+
+
+### 处理不平衡问题  / raw data预处理
+
+```
+欠拟合—以最少数据为标准，丢弃除此之外的类别的多余数据
+min_samples = 111
+# 随机采样，random_state是随机状态变量，可以理解为种子
+df_a = df[df.[column-name1] == "category-name"].sample(min_samples, random_state=20231113) 
+df_b = df[df.[column-name2] == "category-name"].sample(min_samples, random_state=20231113) 
+df_c = df[df.[column-name3] == "category-name"].sample(min_samples, random_state=20231113) 
+df_d = df[df.[column-name4] == "category-name"].sample(min_samples, random_state=20231113) 
+df_e = df[df.[column-name5] == "category-name"].sample(min_samples, random_state=20231113) 
+
+# 平衡数据
+df_balanced = df.concat([df_a, df_b, df_c, df_d], axis=0)
+# 预处理raw data
+import spacy
+nlp = spacy.load("en_core_web_sm")
+def preprocess(text):
+    doc = nlp(text)
+    filter_tokens = []
+    for token in doc:
+        if token.is_stop or token.is_punc:
+            continue
+        filter_tokens.append(token.lemma_)
+    return " ".join(filter_tokens)
+df_balanced['preprocess_column'] = df_balanced.text.apply(preprocess_func)
+```
+
+### 训练-测试分割
+
+```
+from sklearn.model_selection import train_test_split
+
+x_train， x_test, y_train, y_test = train_test_split(
+	df_balanced_text,
+	df_balanced_category,
+	test_size=0.2,
+	random_state=20231113,
+	stratify=df_balanced_category   # 在训练和测试的所有类别中创建相同数量的样本
+)
+
+# 打印的shape列与列之间相同
+y_train.value_counts()
+y_test.value_counts()
+```
+
+### 使用分类模型拟合数据(训练)
+
+```
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report
+
+# 创建分类器
+clf = Pipeline([
+	("vectorizer-bow", Vectorizer()),
+	("Multi NB", MultinomialNB())
+])
+# 训练
+clf.fit(x_train, y_train)
+
+# 测试
+y_pred = clf.predict(x_test)
+classification_report(y_test, y_pred)
+```
+
+
+
+### 拆分基本词 
+
+```
+import spacy
+nlp = spacy.load("en_core_web_sm")
+
+# 定义词形还原的处理函数
+def preprocess(text):
+    doc = nlp(text)
+    filter_tokens = []
+    for token in doc:
+        if token.is_stop or token.is_punc:
+            continue
+        filter_tokens.append(token.lemma_)
+    return " ".join(filter_tokens)
+
+# 使用处理函数遍历文档
+doc = [preprocess(text) for text in corpus]
+```
+
+### 获取词汇表
+
+```
+from sklearn.feature_extraction.text import CountVectorizer
+ 
+# 创建词袋模型, ngram_range用于设置词袋的多元词的组合
+v = CountVectorizer(ngram_range=(1,1)) # default setting
+# 拟合数据
+v.fit(["xxx xxx xx x x xxx x"])
+v.vocabulary_
+```
+
+### 文本转向量
+
+```
+from sklearn.feature_extraction.text import CountVectorizer
+ 
+v = CountVectorizer(ngram_range=(1,1)) # default setting
+v.transform(["..."]).toarray()
 ```
 
 
