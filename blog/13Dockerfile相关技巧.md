@@ -1,12 +1,10 @@
-# 13Dockerfile相关技巧
+# 13Dockerfile变量使用与命令合并
 
 ---
 
 Dockerfile文件，本质上是一种configure文件。而在虚拟化这个应用背景下，configure更加侧重于对config的灵活调整以满足简洁高效的配置迁移。
 
 下面介绍一些在Dockerfile中常用的指令，很多代码构建的核心概念基本相通，只是换了层皮。
-
-## 
 
 ## 变量使用
 

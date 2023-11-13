@@ -63,6 +63,13 @@ CMD ["param1","param2"]
 CMD command param1 param2
 ```
 
+```
+ENTRYPOINT主要针对对容器的初始化和参数声明，CMD用于真正定义主程序启动命令
+在优先级上，ENTRYPOINT > CMD
+```
+
+
+
 ### EXPOSE
 
 ```
