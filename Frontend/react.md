@@ -1,7 +1,65 @@
 # 命令
+
 脚手架: npm-create-react-app -g
 版本: create-react-app --version
 创建 create-react-app xxx   (React规范：小写字母+数字+_)
+
+# 基础知识
+
+- 其它补充
+  - camelCase / PascalCase / kababCase (xxx-xxx)
+  - React.createElement(el, props, ...children)
+    - 其返回的对象既为VDOM | JSX对象 | JSX元素 —— 本质上都是通过JS对象表示的对需要生成的DOM的描述信息
+    - 包括type props key ref等属性, props中又包含children以及普通props
+- webpack配置项与React的关系——>通过eject命令暴露配置项-> 重新配置webpack配置项
+  - 通过配置webpack, 修改默认端口、打包路径等操作
+  - 兼容处理
+  - 跨域处理
+    - 跨域代理模块: http-procy-middleware, 是webpack dev server的底层实现
+
+- 数据驱动渲染视图 MVC(React) MVVM(Vue)
+  - MVC(model, view, controller) / MVVM(model, view, viewModel)
+  - 基本思想：不直接操作DOM, 而是通过数据操作DOM -> 规范下, 不应该直接操作DOM
+  - 根本原因：重绘导致的性能开销大
+  - 核心实现：虚拟DOM->真实DOM, 避免DOM重绘
+  - React
+    - Controller层：通过View层->人机交互
+      - 根据业务需要, 使用React驱动
+      - 与vue不同的是, React是单向驱动, view->model的驱动需要手动实现
+    - View层：通过Model层->视图渲染
+      - 基于JSX语法构建视图
+    - Model层：通过Controller->数据更新
+      - 根据需要动态变化的数据, 建立相应的数据模型
+  - Vue
+    - ViewModel层 (Vue核心实现)
+      - 与MVC不同的是, vue实现了双向的数据监听, 即视图内容改变, 同时映射到数据中, 实现反向驱动 (双向数据绑定)
+    - View层
+      - 通过Template语法实现
+    - Model层
+  - * 引起重绘的原因
+  - * 避免重绘
+
+
+- jsx 基础
+  - 只支持js表达式 / createRoot只能指定body的子节点作为root / 根容器 && 根元素的区别
+  - React.Fragment: <></> 空文档标记标签, 既提供了根元素, 又不会占据具体位置
+  - mustache:
+    - 原始值: string / number 其它数据类型渲染均为空
+    - 对象: 支持, 数组会flat之后依次渲染 && JSX VDOM渲染 && style 行内样式; 不支持Object渲染
+  - 在style内可以用js表达式, 比如三目运算
+  - 通过map操作Model时, 需要给循环元素的根元素给添加key(key一般为index或者data item ID)
+    - 具体原因：方便对DOM Diff
+  - 单独创建循环, 不依赖数据->new Array(n).fill(null), 本质上是创建了一个密集数组
+    - 密集数组->每一项都有值, null也可以
+    - 稀疏数组->每一项都是empty
+- jsx 机制
+  - 本质上是语法转换, 将JSX语法转为React代码(Controller), 最终操作视图(Controller -> Model -> View)
+  - 1. 创建VDOM
+  - 2. 转换为真实DOM
+    - 第一次渲染时, 缓存VDOM, 并直接转换为真实DOM
+    - 后续更新时, 通过diff比对, 计算PATCH包(差异), 最后只更新PATCH补丁包
+
+---
 
 # 结构
 React项目
@@ -27,7 +85,7 @@ babel-preset-env es6+react语法转为es5
 
 create-react-app脚手架使用的是sass
 
-使用less 
+使用less
 
 ```
 yarn add less less-loader@8
@@ -89,7 +147,7 @@ yarn build
 npx create-razzle-app xxx
 
 同时构建客户端和服务器段代码
-yarn start:pord 
+yarn start:pord
 
 yarn build
 ```
@@ -113,7 +171,7 @@ yarn build
 ```
 npx create-next-app xxx
 
-cd xxx 
+cd xxx
 yarn dev
 
 生成静态版本

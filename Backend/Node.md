@@ -63,6 +63,36 @@ tick开始时会同时创建watch dogtimer、 watch dog event loop和主事件�
 	通知到来后，后半部分也就结束，整个tick结束。
 ```
 
+### Node事件循环源码
+
+```
+do {
+  if (env->is_stopping()) break;
+  uv_run(env->event_loop(), UV_RUN_DEFAULT);
+  if (env->is_stopping()) break;
+
+  platform->DrainTasks(isolate);
+
+  more = uv_loop_alive(env->event_loop());
+  if (more && !env->is_stopping()) continue;
+
+  if (EmitProcessBeforeExit(env).IsNothing())
+    break;
+
+  {
+    HandleScope handle_scope(isolate);
+    if (env->RunSnapshotSerializeCallback().IsEmpty()) {
+      break;
+    }
+  }
+
+  // Emit `beforeExit` if the loop became alive either after emitting
+  // event, or after running some callbacks.
+  more = uv_loop_alive(env->event_loop());
+} while (more == true && !env->is_stopping());
+
+```
+
 
 
 ## 引申知识
