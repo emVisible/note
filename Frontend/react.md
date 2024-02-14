@@ -4,13 +4,32 @@
 版本: create-react-app --version
 创建 create-react-app xxx   (React规范：小写字母+数字+_)
 
+# 相关数据包
+- prop-types 检测props数据
+- react-jss react css
+- axios && qs 网络传输
+- blueimp-md5 加密
+- fastclick 移动端click事件
+- http-proxy-middleware CORS
+- lib-flexible 移动端响应式
+- postcss-pxtorem 移动端响应式
+- cross env 设置env
+
 # 基础知识
 
 - 其它补充
   - camelCase / PascalCase / kababCase (xxx-xxx)
   - React.createElement(el, props, ...children)
     - 其返回的对象既为VDOM | JSX对象 | JSX元素 —— 本质上都是通过JS对象表示的对需要生成的DOM的描述信息
-    - 包括type props key ref等属性, props中又包含children以及普通props
+    - 包括$$typeof type props key ref等属性, props中又包含children以及普通props, children通过钩链进行递归操作
+    - 其中第三个参数可以直接为VDOM对象 / JSX对象
+  - 组件使用CamelCase命名
+  - 对象设置 (React组件中, props为只读, 其原因是被冻结)
+    - 冻结 Object.freeze() / Object.isFrozen(), 不能进行曾删改劫持以及Object.defineProperty()
+    - 密封 Object.seal() / Object.isSealed(),可修改值, 不能增加删除劫持
+    - 不可扩展 Object.preventExtensions() / Object.isExtensible, 不可增加成员
+  - 类组件中, 构造函数为什么需要super(props)?
+    - 在原理中, Component默认接收props并对this进行绑定, 继承后调取实例this指向发生变化, 即指向类组件的实例; 而Component本身需要接收参数, 绑定props到this上, 这样一来, 不传递props就相当于Component在空转, 因为Component没有props数据可以绑定到this上
 - webpack配置项与React的关系——>通过eject命令暴露配置项-> 重新配置webpack配置项
   - 通过配置webpack, 修改默认端口、打包路径等操作
   - 兼容处理
@@ -53,11 +72,48 @@
     - 密集数组->每一项都有值, null也可以
     - 稀疏数组->每一项都是empty
 - jsx 机制
-  - 本质上是语法转换, 将JSX语法转为React代码(Controller), 最终操作视图(Controller -> Model -> View)
+  - 本质上是语法转换, 将JSX语法转为React代码(Controller), 最终操作真实DOM(Controller -> Model -> View, VDOM->DOM)
   - 1. 创建VDOM
   - 2. 转换为真实DOM
     - 第一次渲染时, 缓存VDOM, 并直接转换为真实DOM
     - 后续更新时, 通过diff比对, 计算PATCH包(差异), 最后只更新PATCH补丁包
+
+- slot
+  React中需要手动实现slot机制
+  在FunctionComponent中, 接收props.chldren, 随后：
+  - 通过React内置函数：React.children.toArray(children)
+  - 手动写判断
+
+  - 具名插槽
+    - 对子组件
+      - 设置数组存放具名插槽位置
+      - 对props.children进行filter遍历, 提取具名, 并将其对应child放入数组中
+      - JSX渲染数组
+    - 对父组件
+      - 传递相应的props, 一般叫slot即可
+
+- 组件
+  - 组件封装
+    - 实现: slot + 规则校验(使用PropTypes包)
+  - 静态组件
+    应用场景: 不需要动态更新; 只需要渲染一次
+    - 函数属于静态组件:
+      - 初次渲染: 从函数作用域中解析props(冻结), 最后对VDOM渲染
+      - 后续操作: 只更新作用域中的数据, 并不触发组件内容的更新渲染
+      - 转为动态: 在父组件中传递不同的props, 并调用
+  - 动态组件
+    类组件, Hooks组件
+    - 类组件
+      - (ES6)class xxx extends React.Component || class xxx extends React.PureComponent; (ES5) 组合寄生
+        - constructor可以不写, React会自动将属性绑定到实例上
+        - constructor写出来, 一般用于添加动态计算的属性 / 额外属性
+      - 覆盖render方法
+        - render渲染时, 基于type不同: str-标签; function-执行&&属性绑定; constructor-执行(new)&&属性绑定到实例
+        - 每次调用类组件都创建单独的实例
+        - render方法返回的VDOM作为视图渲染
+      - 状态初始化(state)
+        - state会自动挂载到实例上,默认为null
+        -
 
 ---
 
