@@ -30,6 +30,11 @@
     - 不可扩展 Object.preventExtensions() / Object.isExtensible, 不可增加成员
   - 类组件中, 构造函数为什么需要super(props)?
     - 在原理中, Component默认接收props并对this进行绑定, 继承后调取实例this指向发生变化, 即指向类组件的实例; 而Component本身需要接收参数, 绑定props到this上, 这样一来, 不传递props就相当于Component在空转, 因为Component没有props数据可以绑定到this上
+  - 使用UNSAFE_xxx可以手动指定该方法为不安全方法, 去除console中的warning
+  - React.StrictMode 属于React的严格模式, 用于检验React的语法等规范性 / 旧版组件库存在不规范的React语法, 可以不使用React严格模式
+  - 周期函数=钩子函数
+
+
 - webpack配置项与React的关系——>通过eject命令暴露配置项-> 重新配置webpack配置项
   - 通过配置webpack, 修改默认端口、打包路径等操作
   - 兼容处理
@@ -104,6 +109,8 @@
   - 动态组件
     类组件, Hooks组件
     - 类组件
+      初次渲染: getDefaultProps-getInitialState-componentWillMount-render-componentDidMount
+
       - (ES6)class xxx extends React.Component || class xxx extends React.PureComponent; (ES5) 组合寄生
         - constructor可以不写, React会自动将属性绑定到实例上
         - constructor写出来, 一般用于添加动态计算的属性 / 额外属性
@@ -112,8 +119,30 @@
         - 每次调用类组件都创建单独的实例
         - render方法返回的VDOM作为视图渲染
       - 状态初始化(state)
+        重要的思想是通过状态的变化进行编程, 状态值与视图的更新之间的关系
         - state会自动挂载到实例上,默认为null
-        -
+        - React中直接修改状态不会使视图更新——对比vue, vue通过对状态进行数据劫持, 会在set函数中通知视图更新
+          需要通过特定的方法进行视图更新, 需要基于React本身提供的方法
+          - setState() 设置state值并更新视图
+          - forceUpdate() 强制更新
+        - 初始化时依次的Hooks顺序, 常用
+          - componentWillMount 第一次渲染前
+          - render 第一次渲染
+          - componentDidMount 第一次渲染完毕, 可获取到DOM
+        - 后续状态——组件更新逻辑
+          - shouldComponentUpdate(previousState, nextState) previousState为改变的当前值, nextState为要更新的值
+            - 若使用了forceUpdate(), 会跳过校验
+          - componentWillUpdate(previousState, nextState) (Unsafe)状态未修改
+          - render, 生成new VDOM -> Diff对比 -> 渲染差异部分为真实DOM
+        - 父组件的渲染遵循深度优先:
+          - 父组件初次渲染:
+            - FatherComponent willMount -> FatherComponent render -> FatherComponent didMount
+            - 其中, FatherComponent render = [ChildComponent willMount -> ChildComponent render -> childComponent didMount]
+            - 整体是深度优先遍历
+          - 父组件的更新:
+            - FatherComponent shouldComponentUpdate -> FatherComponent componentWillUpdate -> FatherComponent render -> FatherComponent component DidUpdate
+            - 其中, FatherComponent componentWillUpdate = [ChildComponent componentWillRecieveProps->ChildComponent shouldComponentUpdate->ChildComponent componentWillUpdate->ChildComponent render-> ChildComponent componentDidUpdate]
+
 
 ---
 
