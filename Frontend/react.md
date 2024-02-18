@@ -33,6 +33,7 @@
   - 使用UNSAFE_xxx可以手动指定该方法为不安全方法, 去除console中的warning
   - React.StrictMode 属于React的严格模式, 用于检验React的语法等规范性 / 旧版组件库存在不规范的React语法, 可以不使用React严格模式
   - 周期函数=钩子函数
+  - 浏览器渲染队列 && VDOM初次渲染 比较类似, 都是准备好之后, 一次渲染
 
 
 - webpack配置项与React的关系——>通过eject命令暴露配置项-> 重新配置webpack配置项
@@ -100,12 +101,15 @@
 - 组件
   - 组件封装
     - 实现: slot + 规则校验(使用PropTypes包)
-  - 静态组件
+  - 静态组件(函数组件)
+    静态组件无法基于内部实现视图更新
     应用场景: 不需要动态更新; 只需要渲染一次
     - 函数属于静态组件:
       - 初次渲染: 从函数作用域中解析props(冻结), 最后对VDOM渲染
       - 后续操作: 只更新作用域中的数据, 并不触发组件内容的更新渲染
-      - 转为动态: 在父组件中传递不同的props, 并调用
+      - 转为动态:
+        - 在父组件中传递不同的props, 并调用, 父组件更新, 子组件也会相应更新
+        - Hooks + 函数组件, 实现静态组件动态化
   - 动态组件
     类组件, Hooks组件
     - 类组件
@@ -118,6 +122,7 @@
         - render渲染时, 基于type不同: str-标签; function-执行&&属性绑定; constructor-执行(new)&&属性绑定到实例
         - 每次调用类组件都创建单独的实例
         - render方法返回的VDOM作为视图渲染
+
       - 状态初始化(state)
         重要的思想是通过状态的变化进行编程, 状态值与视图的更新之间的关系
         - state会自动挂载到实例上,默认为null
@@ -125,6 +130,7 @@
           需要通过特定的方法进行视图更新, 需要基于React本身提供的方法
           - setState() 设置state值并更新视图
           - forceUpdate() 强制更新
+
         - 初始化时依次的Hooks顺序, 常用
           - componentWillMount 第一次渲染前
           - render 第一次渲染
@@ -134,17 +140,54 @@
             - 若使用了forceUpdate(), 会跳过校验
           - componentWillUpdate(previousState, nextState) (Unsafe)状态未修改
           - render, 生成new VDOM -> Diff对比 -> 渲染差异部分为真实DOM
+
         - 父组件的渲染遵循深度优先:
           - 父组件初次渲染:
-            - FatherComponent willMount -> FatherComponent render -> FatherComponent didMount
-            - 其中, FatherComponent render = [ChildComponent willMount -> ChildComponent render -> childComponent didMount]
+            - (Father)componentWillMount -> (Father)render ->  (Father)componentDidMount
+            - 其中, FatherComponent render = [((Child))willMount -> (Child) render -> ((Child)) didMount]
             - 整体是深度优先遍历
           - 父组件的更新:
-            - FatherComponent shouldComponentUpdate -> FatherComponent componentWillUpdate -> FatherComponent render -> FatherComponent component DidUpdate
-            - 其中, FatherComponent componentWillUpdate = [ChildComponent componentWillRecieveProps->ChildComponent shouldComponentUpdate->ChildComponent componentWillUpdate->ChildComponent render-> ChildComponent componentDidUpdate]
+            - (Father) shouldComponentUpdate -> (Father) componentWillUpdate ->  (Father)render -> (Father)componentDidUpdate
+            - 其中, (Father)componentWillUpdate = [(Child)componentWillRecieveProps->(Child) shouldComponentUpdate->(Child) componentWillUpdate->(Child)render-> (Child)componentDidUpdate]
+          - 父组件卸载:
+            - (Father)componentWillUnmound->销毁
+            - 其中, (Father) componentWillUnmound = [(Child)componentWillUnmound -> 销毁]
 
+- PureComponent
+  - 类组件继承后, 会增加一个shouldComponentUpdate Hook, 所以在继承了它之后, 显式使用shouldComponentUpdate会出现警告
+  - 其中, shouldComponentUpdate会添加一个浅对比(对Object只进行第一层对比, 先对比数量, 再对比属性值), 确定组件是否需要更新
+
+- 受控组件与非受控组件
+  - 受控组件：通过修改数据->视图更新
+  - 非受控组件：通过Ref获取DOM元素->实现具体的需求和效果
+    原理: render时根据VDOM的ref属性类别, 若为string, 则将其push到this.refs中; 若为function则执行;
+    1. 给DOM元素设置ref, 通过this.refs.xxx获取
+    2. 给DOM元素的ref=(dom)=>{this.xxx = dom}, 在组件内部设置reference
+    3. 通过const ref = React.createRef()创建ref对象, 并在DOM的ref={ref}; 此时ref.current为当前的DOM对象
+  - 在父组件中, 当ref指向子组件(类组件)时, 则获取的是组件实例
+  - 父组件中, 函数组件不能直接通过ref获取引用, 会报错; 需要将函数组件包裹在React.forwardRef()中, 函数组件自动获取两个params: props和ref, 通过间接传递ref可以在父组件中获取一个子组件的引用
+
+- React在组件上按照类型划分(函数组件 && 类组件), Vue在组件上按照作用域划分(局部组件 && 全局组件)
+
+- setState
+  队列 && 一次渲染(异步批处理)
+  React18中, 均为异步操作; React16中, 合成事件 && hooks中为异步, Timer, DOM等为同步
+  - this.setState(partialState, callback), 回调函数能够精准地对部分状态更新后触发, componentDidUpdate则类似于广播, 任何更新都会执行
+    - callback机制类似于vue中的$nextTick
+  - 注意异步更新+渲染机制
+  - 更新逻辑: shouldComponentUpdate-componentWillUpdate-更新数据-render-componentDidUpdate-[callback]
+  - setState通过任务队列updater, 对状态进行异步批处理(所有代码操作结束则开始清空队列 ), 当多个setState连续执行且指向相同的patialState, 则会一次执行, 只触发一次渲染
+  - 减少更新次数, 提高渲染效率, 对状态有效进行批处理
+  - import {flushSync} from 'react-dom'; 方法可以让状态更新队列updater立即处理; 具体使用: 包裹在setState中
+  - 1. this.setState({}); 渲染一次,
+  - 2. this.setState((prevState)=>{}); 渲染一次, 实现多个重复操作——将多个回调添加到队列中
+
+- SyntheticEvent
+  以onXxx开头的事件, 通过React内部进行了封装
+  
 
 ---
+
 
 # 结构
 React项目
