@@ -34,7 +34,22 @@
   - React.StrictMode 属于React的严格模式, 用于检验React的语法等规范性 / 旧版组件库存在不规范的React语法, 可以不使用React严格模式
   - 周期函数=钩子函数
   - 浏览器渲染队列 && VDOM初次渲染 比较类似, 都是准备好之后, 一次渲染
+  - 原生冒泡与捕获的起点和终点为document
+  - (模拟触摸事件以去除300ms延迟: onTouchStart/onTouchMove/onTouchEnd)fastclick包 / 手势事件库2
+    - 连续点击两下: PC端 2次click + 1次doubleClick; 移动端(300ms延迟): (点一次后300ms内点第二次)只触发doubleClick
 
+
+版本差别
+- 渲染
+  - 16: React.render()
+  - 18: root=React.createRoot(...); root.render()
+- setState任务队列
+  - 16: 合成事件 && hooks为异步, 其它为同步
+  - 18: 均为异步
+- SyntheticEvent
+  事件缓冲池: get-操作-clean
+  - 16: 基于事件缓存池(通过e.persist()可缓存事件对象; 防止重新创建新的合成对象)  事件委托给document, 只对冒泡实现事件委托
+  - 18: 无事件缓存池(无事件对象信息清空的问题);   委托给#root, 拆分捕获和冒泡两个阶段, 均实现
 
 - webpack配置项与React的关系——>通过eject命令暴露配置项-> 重新配置webpack配置项
   - 通过配置webpack, 修改默认端口、打包路径等操作
@@ -184,7 +199,22 @@
 
 - SyntheticEvent
   以onXxx开头的事件, 通过React内部进行了封装
-  
+  流程: 属性赋值-#root绑定(触发时先原生冒泡+捕获, 再到组合冒泡+捕获)-回调
+  - 为处理事件传参: 绑定普通函数到类组件中, this为undefined: bind && arrow function; 接收param: SyntheticBaseEvent
+    - 当传递额外参数后, 事件对象本身为最后的参数
+  - 机制: 事件委托(而不是事件绑定, 除根容器之外, React不对具体的元素做事件绑定); 事件委托的基础是浏览器事件传递机制, 在此基础上封装, 实现事件委托, 并增加了一些事件处理;
+    - 委托对象: R16及之前委托给document, 只对冒泡进行了事件委托; R17及之后委托给#root;
+    - 最后对#root做事件绑定(捕获 && 冒泡); 这样达到任何事件的传递都会经过#root元素, 并触发其捕获和冒泡;
+    - 委托机制: 为元素设置onXxx属性后, 通过#root的事件委托; 在相应的阶段触发属性对应的函数, 类似于回调
+      通过e.path获取相对事件传递路径; 执行前对原生事件对象进行this重定向 && 合成对象处理
+      - 冒泡: path.forEach(e=>{e.onclick && e.onclick()})
+      - 捕获: [...path].reverse().forEach(e=>{e.onClickCapture && e.onCLickCapture()})
+  - 合成事件中的stopPropagation
+    阻止原生 && 合成事件的事件传播 (向上阻止原生事件e.nativeEvent.stopPropagation, 向下阻止合成事件)
+    e.nativeEvent.stopImmediatePropagation()阻止同级合成事件
+  - Vue中的循环事件绑定无事件委托机制, 有多少个事件就绑定了多少个; React则只对根容器绑定事件, 元素只添加属性, 委托给根容器
+
+
 
 ---
 
