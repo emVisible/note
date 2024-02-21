@@ -129,6 +129,7 @@
     类组件, Hooks组件
     - 类组件
       初次渲染: getDefaultProps-getInitialState-componentWillMount-render-componentDidMount
+      后续更新: componentShouldUpdate-componentWillUpdate-render-componentDidUpdate 后续更新只在初次new的实例上, 重新调用render
 
       - (ES6)class xxx extends React.Component || class xxx extends React.PureComponent; (ES5) 组合寄生
         - constructor可以不写, React会自动将属性绑定到实例上
@@ -213,6 +214,24 @@
     阻止原生 && 合成事件的事件传播 (向上阻止原生事件e.nativeEvent.stopPropagation, 向下阻止合成事件)
     e.nativeEvent.stopImmediatePropagation()阻止同级合成事件
   - Vue中的循环事件绑定无事件委托机制, 有多少个事件就绑定了多少个; React则只对根容器绑定事件, 元素只添加属性, 委托给根容器
+
+## React Hooks Component
+Hooks组件本质是函数组件, 基于函数作用域, 是动态组件与静态组件的折中
+
+useState
+状态改变时, 即值改变, 同时通知视图渲染
+返回数组, index0为value, index1为set function
+每次更新都是重新执行函数->传递props-产生作用域-Diff(初次更新无Diff)-Update, 产生新的作用域, 基于closure
+```js
+var _state;
+function useState(initialValue){
+  if (typeof initialValue === 'undefined') _state = initalValue
+  var setState = function setState(value) {
+    _state = value
+  }
+  return [_state, setState]
+}
+```
 
 
 
