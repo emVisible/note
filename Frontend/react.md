@@ -16,7 +16,7 @@
 - cross env 设置env
 
 # 基础知识
-
+React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
 - 其它补充
   - camelCase / PascalCase / kababCase (xxx-xxx)
   - React.createElement(el, props, ...children)
@@ -37,7 +37,7 @@
   - 原生冒泡与捕获的起点和终点为document
   - (模拟触摸事件以去除300ms延迟: onTouchStart/onTouchMove/onTouchEnd)fastclick包 / 手势事件库2
     - 连续点击两下: PC端 2次click + 1次doubleClick; 移动端(300ms延迟): (点一次后300ms内点第二次)只触发doubleClick
-
+  - render方法只是转为真实DOM, 但还需要最后的将其放到浏览器中
 
 版本差别
 - 渲染
@@ -218,7 +218,21 @@
 ## React Hooks Component
 Hooks组件本质是函数组件, 基于函数作用域, 是动态组件与静态组件的折中
 
-useState
+### useState
+使用: 不需要变化的初始值, 直接传递; 需要加工的初始值, 通过函数传递;
+特点
+- 不支持部分状态修改 useState实现部分状态更改: setXxx([...Xxx, newState])
+- (React18)异步批处理执行——异步+更新队列——单次渲染
+- 可结合flushSync.
+  ```js
+  const [num, setNum] = useState(1)
+  for (let i = 0; i < 10; i++){
+    flushSync(()=>{
+      setNum(num+1) // result: 11
+    })
+  }
+  ```
+- 自带性能优化机制: 每次修改状态值时, 进行componentShouldUpdate比较(Object.is)
 状态改变时, 即值改变, 同时通知视图渲染
 返回数组, index0为value, index1为set function
 每次更新都是重新执行函数->传递props-产生作用域-Diff(初次更新无Diff)-Update, 产生新的作用域, 基于closure
@@ -232,6 +246,41 @@ function useState(initialValue){
   return [_state, setState]
 }
 ```
+### useEffect
+在函数组件中使用生命周期函数
+使用:
+- 不设置依赖(获取最新value)
+  - useEffect(callback), 相当于componentDidMount
+  - 第一次渲染 && 视图刷新执行
+- 设置依赖
+  - useEfeect(callback, []), 类似于componentDidMount
+    - 仅在第一次渲染执行
+  - useEffect(callback, [param]), 同上
+    - 第一次渲染 && 依赖更新时执行
+  - useEffect(()=>{return ()=>{}}) (获取上一次的value)
+    - 组件施放时执行, 返回小函数
+    - 若组件更新, 执行上一次的小函数, 返回小函数
+原理:
+- 通过mountEffect, 将callback以及相关信息添加到链表队列
+- 视图渲染完毕后, 通过updateEffect, 将链表按相应的hook执行
+执行顺序:
+- 如果有基于return的函数, 优先执行
+- 其它则按规则执行
+细节:
+- 需要在组件的最外层作用域中使用, 不能通过if for等作用域中嵌套
+- async修饰function后, 默认返回Promise Instance;
+  - 而useEffect如果使用异步callback, 则需要手动将返回值重写 / 相应步骤封装为异步函数, 再通过await执行 / 通过.then方法重构;
+- 初次渲染完毕后会触发useEffect, 激活Effect链表, 从而重新渲染真实DOM, 当频繁激活时, 会出现内容闪烁
+- useLayoutEffect:在初次render之前, 对状态修改并合并VDOM, 最后一次渲染; 触发上优先于useEffect
+  - 改善使用useEffect中, 状态值多次切换导致多次渲染的问题
+  - 区别就是useLayoutEffect会阻止真实DOM渲染, 优先执行Effect链表中的callback; useEffect不阻塞浏览器渲染真实DOM, 在渲染的过程中同时执行callback
+- 无论是useEffect, 还是useLayoutEffect, 均不会影响DOM的获取;真实DOM已经创建, 区别只是浏览器是否渲染;
+- 视图更新的步骤:
+   1. 基于React将JSX转为createElement格式; (MVC中的C)
+   2. 基于React, 创建出VDOM (MVC中的M)
+   3. 基于React(render), 将VDOM转为真实DOM(DOM-DIFF)
+   4. 浏览器将其结果进行绘制 // useLayoutEffect改变优先级, 优先同步执行callback, 再进行绘制; useEffect异步同时进行callback和绘制;
+
 
 
 
