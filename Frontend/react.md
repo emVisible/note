@@ -281,6 +281,34 @@ function useState(initialValue){
    3. 基于React(render), 将VDOM转为真实DOM(DOM-DIFF)
    4. 浏览器将其结果进行绘制 // useLayoutEffect改变优先级, 优先同步执行callback, 再进行绘制; useEffect异步同时进行callback和绘制;
 
+### useRef
+ref的基本功能: 获取真实DOM的引用, 获取子组件实例(子-类组件、子-函数组件-forwardRef)
+ref的基本使用(类组件): this.refs.xxx(不推荐); ref = {r=>this.xxx=r}; this.xxx = createRef() && <div ref={this.xxx}></div>
+ref转发: const Child = React.forwardRef(function(props, ref){...}); 获取子组件特定元素
+- *父组件获取子组件内部状态或方法——基于React.forwadRef(), 使用useImperativeHandle
+  ```js
+  useImperativeHandle(ref, ()=>{
+    // return的内容被父组件接收, 使用该hook会覆盖父组件中的ref.current对象, 以此达到子(状态 && 方法)->父的传递
+    return {
+      stateA,
+      StateB,
+      MethodA,
+      ...
+    }
+  })
+  ```
+组件中使用: useRef
+对比:
+- useRef在更新渲染前后的引用对象均为同一个对象, 性能开销小
+- createRef在更新渲染后会创建新的引用对象, 性能开销大
+
+### useMemo
+使用场景: 消耗性能 / 时间的计算操作 && 算法
+目的: 减少函数组件更新时的不必要的性能开销, 当非依赖项改变时拥有缓存而不必重新计算耗时操作
+原因: 基于函数组件更新的原理——每次更新重新执行函数全部的内容, 并基于引用构建闭包
+诉求: 只有当依赖的状态改变时, 视图刷新
+使用: useMemo(callback, [dependencies])
+效果: 初次渲染时, callback执行; 依赖状态改变时, callback执行; 每次执行完毕, 将结果赋值给变量, 达到缓存的效果; 类似于Vue中的计算属性
 
 
 
