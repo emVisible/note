@@ -38,6 +38,7 @@ React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
   - (模拟触摸事件以去除300ms延迟: onTouchStart/onTouchMove/onTouchEnd)fastclick包 / 手势事件库2
     - 连续点击两下: PC端 2次click + 1次doubleClick; 移动端(300ms延迟): (点一次后300ms内点第二次)只触发doubleClick
   - render方法只是转为真实DOM, 但还需要最后的将其放到浏览器中
+  - 特殊的命名规则: 使用useXxx作为自定义Hook命名, 通过jsx解析则会有Hook相关的特性——无法在循环、判断中使用
 
 版本差别
 - 渲染
@@ -217,6 +218,8 @@ React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
 
 ## React Hooks Component
 Hooks组件本质是函数组件, 基于函数作用域, 是动态组件与静态组件的折中
+函数组件更新的本质:
+- 重新执行函数, 即创建函数作用域, 生成函数内的闭包, 消耗内存, 声明函数内部的地址空间
 
 ### useState
 使用: 不需要变化的初始值, 直接传递; 需要加工的初始值, 通过函数传递;
@@ -302,13 +305,28 @@ ref转发: const Child = React.forwardRef(function(props, ref){...}); 获取子�
 - useRef在更新渲染前后的引用对象均为同一个对象, 性能开销小
 - createRef在更新渲染后会创建新的引用对象, 性能开销大
 
-### useMemo
+### useMemo——栈内存缓存(原始值, 多用于string, number)
 使用场景: 消耗性能 / 时间的计算操作 && 算法
 目的: 减少函数组件更新时的不必要的性能开销, 当非依赖项改变时拥有缓存而不必重新计算耗时操作
 原因: 基于函数组件更新的原理——每次更新重新执行函数全部的内容, 并基于引用构建闭包
 诉求: 只有当依赖的状态改变时, 视图刷新
 使用: useMemo(callback, [dependencies])
 效果: 初次渲染时, callback执行; 依赖状态改变时, callback执行; 每次执行完毕, 将结果赋值给变量, 达到缓存的效果; 类似于Vue中的计算属性
+useMemo可以多使用
+
+### useCallback——堆内存缓存(引用值, 主要用于组件内部函数)
+应用场景: 父子组件嵌套时, 使得子组件按需更新
+使用: useCallback(callback, [dependencies])
+效果: 初次渲染, callback执行; 依赖状态改变, callback执行;  每次执行完毕, 将结果赋值给变量, 达到缓存的效果; 类似于Vue中的计算属性
+
+useCallback只在高频修改时使用
+
+使子组件按需更新:
+- 对父组件传递的属性 && 方法: 使用useCallback
+- 对子组件:
+   方法1: 类组件: 继承React.PureComponent(对新/旧属性比较——shouldComponentUpdate)
+   方法2: 函数组件: React.memo包裹
+
 
 
 
