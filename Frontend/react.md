@@ -328,10 +328,50 @@ useCallback只在高频修改时使用
    方法2: 函数组件: React.memo包裹
 
 
-### 组件通讯
+
+### useContext
+组件通讯
 单向数据流:
 - 父组件---props && method--->子组件 ok; 反之不可
 - 基于子组件修改父组件需要有父组件的支持——传递给子组件需要处理的信息, 即父组件本身要有处理自己的功能, 并将其传递给子组件
+
+单层数据通信——父子组件通信:
+- 传递props
+
+多层数据通信——祖先&&后代通信:
+- useContext
+
+使用:
+- 祖先:
+  - 在组件中, 创建上下文对象React.createContext(), 其作为container用于包裹
+  - 将组件包裹到祖先组件之上, 通过XxxXxx.Provider进行标记, 作为标签
+  - 设置对象作为其属性value的值, 对象内部引用需要传递的信息
+- 后代：
+  - 类组件:
+    方法1
+    - 导入封装的上下文对象组件
+    - 设置类属性contextType为该组件
+    - 通过this.context, 获取所需
+    方法2
+    - 通过该组件的XxxXxx.Consumer作为后代组件的根标签
+    - 内部
+      ```js
+      render(){
+      return (
+        <XxxXxx.Consumer>
+          {
+            context=>{
+              // 包裹返回的后代组件, 其中, 从context上可以拿到所有上下文信息
+            }
+          }
+        </XxxXxx>
+        )
+      }
+      ```
+
+机制:
+- 祖先组件更新时, prop-value会重新赋值储存
+
 
 
 ---
