@@ -343,7 +343,7 @@ useCallback只在高频修改时使用
 
 使用:
 - 祖先:
-  - 在组件中, 创建上下文对象React.createContext(), 其作为container用于包裹
+  - 创建上下文对象 在组件中, 创建上下文对象React.createContext(), 其作为container用于包裹
   - 将组件包裹到祖先组件之上, 通过XxxXxx.Provider进行标记, 作为标签
   - 设置对象作为其属性value的值, 对象内部引用需要传递的信息
 - 后代：
@@ -368,9 +368,138 @@ useCallback只在高频修改时使用
         )
       }
       ```
+    - 函数组件:
+      方法1
+      - 同类组件, 使用<XxxXxx.Consumer></XxxXxx.Consumer>
+      方法2
+      - 使用useContext包裹上下文对象(一般为解构)
 
-机制:
-- 祖先组件更新时, prop-value会重新赋值储存
+机制: 祖先组件更新时, prop-value会重新赋值储存
+
+---
+## 样式处理——样式私有化
+
+样式私有化方法
+1. 每个样式都基于jsx style样式, 各自设置对应的Object存储
+   - 动态设置样式 && 优先级提高时, 可以使用
+   - 不利于复用
+   - 不能用伪类
+2. 单独设置外部.css
+3. 基于CSS Module
+   通过打包工具将类名编译为唯一, 达到样式非冲突的目的
+- 文件名为xxx.module.css
+- 基于kv对, 通过打包工具将.class类名唯一化
+- 基于CSS Module导出, 其中设定的类名
+- 使用时通过import引入文件, 使用对应的key, 通过模板字符串获取`${cssmodule.itemAStyle}`
+- 通过
+  global(.style-name)的方法, 可以让类名不受编译影响
+  通过composes: class-style-name继承样式特点
+  如若不经过处理, 则样式均全局生效
+4. 基于CSS-in-Js, 动态管理CSS
+- react-jss包(createUseStyles) / styled-components包(styled.nav``), 使用时解构对象, 将其放在className上
+- 使用时可以传递params, 在定义时的对象的value作为props function
+
+## HOC(高阶函数)
+应用场景: 类组件中使用jss——通过HOC代理
+高阶函数: 内部返回函数的函数, 通过闭包实现函数代理
+一般结构: HOC->jss && process ->
+
+## Redux
+涉及内容
+- redux
+- react-reducx
+- redux中间件
+- mobx
+- react-router-dom
+- redux-saga dva umi
+- antd pro
+
+redux: 公共状态管理方案; 在中大体量 && 高频状态切换 && 复杂更新逻辑中使用;
+父子组件一般通过props && redux
+祖先 && 后代组件一般通过redux
+特性
+- redux可以在非react中使用, 体积仅为2kb
+
+使用
+1. 创建container: createStore([reducer]) && 规划reducer
+  - store容器中, 存储状态 && 事件池;状态发生改变, 执行事件池中的方法;
+2. 获取状态(基于context获取store对象)
+   - store.getState()
+3. 放入事件到事件池(必须保证视图更新 && 上下文为最新)
+   - store.subscribe(func)
+   - 类组件传递forceUpdate()即可
+4. 创建容器时,传递reducer
+  ```js
+  const init = {}
+  let reducer = function reduceer(state=init, action){
+    // 不直接修改原状态; return时直接返回
+    fixState = {...state}
+    switch(action.type){
+      // 根据不同状态, 修改不同信息
+      ...
+      default:
+
+    }
+    return state // 返回的信息替代公共状态——在第一次dispatch时, 设置初始值
+  }
+  ```
+5. 任务分发, 执行reducer, 修改状态
+- store.dispatch({type: xxx })
+
+具体例子:
+```jsx
+function Component(){
+  const store = useContext(store)
+  const [time, setTime] = useState(new Time())
+  const handle = ()=>{
+    console.log("Extra operation.")
+  }
+  useEffect(()=>{
+    // 创建新的context
+    const unsubscript = store.subscribe(handle)
+    store.dispatch(unsubscript)
+    return ()=>{
+      // 移除上一次的方法
+      unsubscript()
+    }
+  }, [time])
+  useEffect(()=>{
+    store.subscribe(()=>{
+      setXxx() // 同时保证视图渲染 && 上下文最新
+    })
+  })
+  return (
+    XXX
+  )
+}
+
+function SubComponent(){
+  const {stateExt} = store.getState()
+  const handle = ()=>{
+    sotre.dispatch({
+      type: 'typeA'
+    })
+  }
+  return (
+    <>
+      <Button onClick={handle}></Button>
+    </>
+  )
+}
+
+```
+
+机制
+- 初次派发, 在redux内部派发; 手动dispatch均为二次派发之后
+- redux对象结构:
+  - @@observable
+  - dispatch
+  - getState
+  - replaceReducer
+  - subscribe
+
+
+
 
 
 
