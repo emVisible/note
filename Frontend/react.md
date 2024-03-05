@@ -15,6 +15,27 @@
 - postcss-pxtorem 移动端响应式
 - cross env 设置env
 
+# 基础巩固
+## fetch
+fetch与XMLHttpRequest的区别:
+- XHR根据状态码, 只有为2时才显示网络请求成功 / Axios基于Promise对XHR进行了封装
+- fetch只在服务器没有反馈时, 才不会显示 / 原生Promise支持
+fetch config
+- method: get head delete options: post put patch
+- mode: *cors(包括了no-cors和same-origin) no-cors same-origin
+- headers : {} / Header Instance
+- cache: *default no-cache force-cache only-if-cached / 使用较多
+- credentials(资源凭证, 如cookie):*same-origin(同源) include(都允许) omit(都不允许) / fetch默认不允许跨域携带资源凭证
+- body: 只适用于POST系列请求, **不同的类型需要指定对应的header信息
+  - 类型1 JSON: application/json -> {"key": "value"}
+  - 类型2 URLENCODED: application/www-xxx-form-urlencoded -> xxx=xxx&xxx=xxx
+  - 类型3 普通String: text/plain
+  - *类型4 FormData对象: 应用于文件上传 && 表单提交——multipart/form-data->const f = new FormData(); f.append('xxx', File)
+  - *类型5 blob / Buffer
+
+与XHR(Axios)对比
+- fetch需要手动拼接基于?的params传参
+
 # 基础知识
 React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
 - 其它补充
@@ -40,6 +61,8 @@ React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
   - render方法只是转为真实DOM, 但还需要最后的将其放到浏览器中
   - 特殊的命名规则: 使用useXxx作为自定义Hook命名, 通过jsx解析则会有Hook相关的特性——无法在循环、判断中使用
 
+- 数据驱动渲染视图 MVC(React) MVVM(Vue)
+
 版本差别
 - 渲染
   - 16: React.render()
@@ -55,10 +78,6 @@ React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
 - webpack配置项与React的关系——>通过eject命令暴露配置项-> 重新配置webpack配置项
   - 通过配置webpack, 修改默认端口、打包路径等操作
   - 兼容处理
-  - 跨域处理
-    - 跨域代理模块: http-procy-middleware, 是webpack dev server的底层实现
-
-- 数据驱动渲染视图 MVC(React) MVVM(Vue)
   - MVC(model, view, controller) / MVVM(model, view, viewModel)
   - 基本思想：不直接操作DOM, 而是通过数据操作DOM -> 规范下, 不应该直接操作DOM
   - 根本原因：重绘导致的性能开销大
@@ -215,6 +234,24 @@ React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
     阻止原生 && 合成事件的事件传播 (向上阻止原生事件e.nativeEvent.stopPropagation, 向下阻止合成事件)
     e.nativeEvent.stopImmediatePropagation()阻止同级合成事件
   - Vue中的循环事件绑定无事件委托机制, 有多少个事件就绑定了多少个; React则只对根容器绑定事件, 元素只添加属性, 委托给根容器
+
+## 跨域处理
+- 跨域代理模块: http-proxy-middleware, 是webpack dev server的底层实现
+```js
+import {createProxyMiddleware} from 'http-proxy-middleware'
+module.exports = function(app){
+  app.use(
+    createProxyMiddleware('/api', {
+      target: "127.0.0.1:xxxx",
+      changeOrigin: true,
+      ws: true,
+      pathRewrite: "^/api"
+    })
+  )
+}
+
+```
+
 
 ## React Hooks Component
 Hooks组件本质是函数组件, 基于函数作用域, 是动态组件与静态组件的折中
@@ -498,7 +535,35 @@ function SubComponent(){
   - replaceReducer
   - subscribe
 
+react-redux中间件
+中间件本身就是一个加工管道, 通过不同的中间件实现不同的效果
+使用
+- createStore(reducer, enhancer), 通过传入enhancer中间件实现对reducer的对应效果
+  - ```js
+  // 添加logger中间件
+  createStore(reducer, applyMiddleware(reduxLogger))
+  ```
+- redux的action方法不支持异步, 支持异步需要使用middleWare
+  原因: 异步函数默认返回Promise包装对象, 其中React经过处理, 会将其变为action, 而默认情况下Promise是没有type属性的
 
+  ```js
+  // 通过redux-thunk中间件处理所要求的action格式, 基于redux-thunk
+  // 实际上是派发了两次: 第一次返回异步函数, 实际上没有效果; 第二次在函数内部通过重写dispatch在中间件内部派发
+  function action(){
+    return async (dispatch)=>{
+      await getData()
+      dispatch({type: "xxx"})
+    }
+  }
+
+  // 通过redux-promise中间件可以有更直观的代码书写: 内部重写dispatch, 监听promise实例, 当状态更改后进行dispatch; 派发单次, 自动处理
+  async function action(){
+    await getData()
+    return {
+      type: "xxx"
+    }
+  }
+  ```
 
 
 
