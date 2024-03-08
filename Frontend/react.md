@@ -16,25 +16,103 @@
 - cross env 设置env
 
 # 基础巩固
+## http库
+http(config)
+- url
+- method
+  - get类:get head delete options(url, config)
+  - post类:post / put / patch(url, body, config)
+- credential: 是否携带凭证(*include, same-origin, omit)
+- headers: 格式必须为纯对象
+- body: 请求主体
+  - POST系列需要设置Content-Type, 若传递为纯对象, 则需要进行parse(不处理会传递[object, object]), 转换为urlencoded格式字符串
+- params: 问号传参, 格式必须为对象, url内部将其拼接到末尾
+- responseType: server返回的结果的类型
+- signal: 中断请求信号
+
+
 ## fetch
 fetch与XMLHttpRequest的区别:
 - XHR根据状态码, 只有为2时才显示网络请求成功 / Axios基于Promise对XHR进行了封装
 - fetch只在服务器没有反馈时, 才不会显示 / 原生Promise支持
+
 fetch config
 - method: get head delete options: post put patch
 - mode: *cors(包括了no-cors和same-origin) no-cors same-origin
 - headers : {} / Header Instance
+  - get / has / forEach / delete / append
 - cache: *default no-cache force-cache only-if-cached / 使用较多
 - credentials(资源凭证, 如cookie):*same-origin(同源) include(都允许) omit(都不允许) / fetch默认不允许跨域携带资源凭证
-- body: 只适用于POST系列请求, **不同的类型需要指定对应的header信息
+- body: 只适用于POST系列请求, 不同的类型需要指定对应的header信息
   - 类型1 JSON: application/json -> {"key": "value"}
   - 类型2 URLENCODED: application/www-xxx-form-urlencoded -> xxx=xxx&xxx=xxx
   - 类型3 普通String: text/plain
   - *类型4 FormData对象: 应用于文件上传 && 表单提交——multipart/form-data->const f = new FormData(); f.append('xxx', File)
   - *类型5 blob / Buffer
 
-与XHR(Axios)对比
-- fetch需要手动拼接基于?的params传参
+fetch response
+- 返回的body为readableStream, 在Response prototype上绑定的方法: text / json / formData / ArrayBuffer / Blob 均为对可读流进行处理
+- 通过catch, 一般为Http status不对 || server没有返回信息 || 数据转换失败
+
+基本使用
+
+```js
+  fetch()
+    .then(response=>{
+      if (...){
+      // 处理
+        return
+      }
+      // 如果不满足要求, 返回reject
+      return Promise.reject()
+    })
+    .catch(e=>{
+
+    }) // 异步处理
+```
+
+与Axios对比
+- fetch需要手动拼接基于params传参
+- Axios中, 对于传递的对象, Axiox会自动将其转换为json字符串, 并且自动设置请求头的Content-Type: application/json
+  手动通过fetch进行POST请求, 这样的问题是复用性差, 需要进行封装重构, 提高可复用性和易用性
+  ```js
+    // 在fetch中手动设置
+    fetch(URL, {
+      method: "POST",
+      headers:{
+        'Content-Type': "application/json"
+        // 'Content-Type': "x-www-form-urlencoded"
+      },
+      body: JSON.stringify({
+        xxx:xxx,
+        ...
+      })
+      // body: qs.stringify({
+      //   xxx:xxx,
+      //   ...
+      // })
+    }).then(res=>{
+      // 业务代码
+      return res.json()
+    }).catch(err=>{
+      return Promise.reject({
+        code: xxx,
+        status: xxx,
+        statusText: xxx
+      })
+    })
+  ```
+
+fetch请求中断
+应用场景有: 保持请求唯一
+- 创建AbortController实例ins
+- 在fetch config中添加signal: ins.signal属性
+- 通过ins.abort() 中断当前请求
+
+fetch通用逻辑封装
+```js
+
+```
 
 # 基础知识
 React本身是JS的地基, 要理解JS的特性, 作用域、闭包、原型等
@@ -535,7 +613,10 @@ function SubComponent(){
   - replaceReducer
   - subscribe
 
-react-redux中间件
+### react-redux
+
+
+### react-redux中间件
 中间件本身就是一个加工管道, 通过不同的中间件实现不同的效果
 使用
 - createStore(reducer, enhancer), 通过传入enhancer中间件实现对reducer的对应效果

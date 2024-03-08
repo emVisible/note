@@ -103,8 +103,6 @@
 
 ---
 
-## 9
-
 通过配置vim.sneak来替换s键功能：双字符查找，s向下，S向上
 
 通过vim.normalModeBindingsNonRecursive配置映射：
